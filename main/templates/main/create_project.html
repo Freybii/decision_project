@@ -1,0 +1,28 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Створення нового проекту</h2>
+    <form method="POST" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="title">Назва проекту</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="form-group mt-3">
+            <label for="description">Опис проекту</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <div class="form-group mt-3">
+            <label for="image">Зображення проекту</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <small class="form-text text-muted">Можна завантажити зображення в форматі JPG, PNG або GIF</small>
+        </div>
+        <div class="form-check mt-3">
+            <input type="checkbox" class="form-check-input" id="is_public" name="is_public">
+            <label class="form-check-label" for="is_public">Зробити проект публічним</label>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Створити проект</button>
+    </form>
+</div>
+{% endblock %} 

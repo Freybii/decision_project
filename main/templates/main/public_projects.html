@@ -1,0 +1,110 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    {% csrf_token %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Публічні проекти</h2>
+        <a href="{% url 'create_project' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Створити новий проект
+        </a>
+    </div>
+
+    <div class="row">
+        {% for project in projects %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex gap-3">
+                        {% if project.image %}
+                        <img src="{{ project.image.url }}" alt="{{ project.title }}" class="rounded" style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                            <i class="fas fa-project-diagram fa-2x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title">{{ project.title }}</h5>
+                                <span class="badge bg-success">Публічний</span>
+                            </div>
+                            <p class="card-text text-muted">
+                                <small>Автор: {{ project.user.username }}</small><br>
+                                <small>Створено: {{ project.created_at|date:"d.m.Y H:i" }}</small>
+                            </p>
+                            <p class="card-text">{{ project.description|truncatewords:30 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">
+                                    <i class="fas fa-list"></i> Альтернатив: {{ project.alternatives.count }}
+                                </span>
+                                <div class="btn-group">
+                                    <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i> Переглянути
+                                    </a>
+                                    {% if user.is_authenticated and project.user != user %}
+                                    <a href="{% url 'copy_project' project.id %}" class="btn btn-outline-success">
+                                        <i class="fas fa-copy"></i> Копіювати
+                                    </a>
+                                    {% endif %}
+                                    {% if user.is_authenticated %}
+                                    <button class="btn btn-outline-primary like-button" 
+                                            data-project-id="{{ project.id }}"
+                                            data-liked="{% if project.id in liked_projects %}true{% else %}false{% endif %}">
+                                        <i class="fas fa-heart {% if project.id in liked_projects %}text-danger{% endif %}"></i>
+                                        <span class="likes-count">{{ project.likes.count }}</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4 class="alert-heading">Немає публічних проектів</h4>
+                <p>Зараз немає доступних публічних проектів для перегляду.</p>
+                <hr>
+                <a href="{% url 'create_project' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Створити новий проект
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeButtons = document.querySelectorAll('.like-button');
+    
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const projectId = this.dataset.projectId;
+            const icon = this.querySelector('i');
+            const countSpan = this.querySelector('.likes-count');
+            
+            fetch(`/projects/${projectId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    icon.classList.add('text-danger');
+                } else {
+                    icon.classList.remove('text-danger');
+                }
+                countSpan.textContent = data.likes_count;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

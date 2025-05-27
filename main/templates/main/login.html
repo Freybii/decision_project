@@ -1,0 +1,103 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Вхід{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Вхід</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Увійти</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Або</p>
+                        <div id="g_id_onload"
+                             data-client_id="676275484107-fq1ui8beoe4kobhn038jgrv74ef0ilnb.apps.googleusercontent.com"
+                             data-callback="handleCredentialResponse">
+                        </div>
+                        <div class="g_id_signin"
+                             data-type="standard"
+                             data-size="large"
+                             data-theme="outline"
+                             data-text="sign_in_with"
+                             data-shape="rectangular"
+                             data-logo_alignment="left">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <p>Немає акаунту? <a href="{% url 'authentication:register' %}">Зареєструватися</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Sign-In API -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+function handleCredentialResponse(response) {
+    console.log('Google Sign-In response received:', response);
+    
+    // Send the token to your backend
+    fetch('/api/auth/google/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            token: response.credential
+        })
+    })
+    .then(response => {
+        console.log('Backend response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Backend response data:', data);
+        if (data.token) {
+            // Store the token
+            localStorage.setItem('token', data.token);
+            // Redirect to home page or profile
+            window.location.href = '/';
+        } else {
+            console.error('No token in response:', data);
+            alert('Помилка входу через Google: ' + (data.error || 'Невідома помилка'));
+        }
+    })
+    .catch(error => {
+        console.error('Error during Google Sign-In:', error);
+        alert('Помилка входу через Google: ' + error.message);
+    });
+}
+</script>
+{% endblock %} 

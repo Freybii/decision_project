@@ -1,0 +1,127 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}Реєстрація{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Реєстрація</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Ім'я користувача</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">Ім'я</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Прізвище</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date_of_birth" class="form-label">Дата народження</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label">Фото профілю</label>
+                            <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password_confirm" class="form-label">Підтвердження паролю</label>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Зареєструватися</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p>Або</p>
+                        <div id="g_id_onload"
+                             data-client_id="676275484107-fq1ui8beoe4kobhn038jgrv74ef0ilnb.apps.googleusercontent.com"
+                             data-callback="handleCredentialResponse">
+                        </div>
+                        <div class="g_id_signin"
+                             data-type="standard"
+                             data-size="large"
+                             data-theme="outline"
+                             data-text="sign_up_with"
+                             data-shape="rectangular"
+                             data-logo_alignment="left">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <p>Вже маєте акаунт? <a href="{% url 'login' %}">Увійти</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Sign-In API -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+function handleCredentialResponse(response) {
+    console.log('Google Sign-In response received:', response);
+    
+    // Send the token to your backend
+    fetch('/api/auth/google/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            token: response.credential
+        })
+    })
+    .then(response => {
+        console.log('Backend response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Backend response data:', data);
+        if (data.token) {
+            // Store the token
+            localStorage.setItem('token', data.token);
+            // Redirect to home page or profile
+            window.location.href = '/';
+        } else {
+            console.error('No token in response:', data);
+            alert('Помилка реєстрації через Google: ' + (data.error || 'Невідома помилка'));
+        }
+    })
+    .catch(error => {
+        console.error('Error during Google Sign-In:', error);
+        alert('Помилка реєстрації через Google: ' + error.message);
+    });
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,723 @@
+{% extends 'main/layout.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="d-flex align-items-start gap-4">
+                <div class="position-relative">
+                    {% if project.image %}
+                    <img src="{{ project.image.url }}" alt="{{ project.title }}" class="img-fluid rounded" style="max-width: 200px; max-height: 200px; object-fit: cover;">
+                    {% endif %}
+                    {% if project.user == request.user %}
+                    <form method="POST" action="{% url 'update_project_image' project.id %}" enctype="multipart/form-data" class="mt-2">
+                        {% csrf_token %}
+                        <div class="input-group input-group-sm">
+                            <input type="file" class="form-control" name="image" accept="image/*" required>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    {% if project.user == request.user %}
+                    <form method="POST" action="{% url 'update_project' project.id %}" class="mb-3">
+                        {% csrf_token %}
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <input type="text" class="form-control form-control-lg border-0 bg-transparent" name="title" value="{{ project.title }}" required style="font-size: 2rem; font-weight: 500; padding: 0;">
+                            <button type="submit" class="btn btn-link text-primary p-0" title="Зберегти зміни">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" name="is_public" id="is_public" {% if project.is_public %}checked{% endif %}>
+                            <label class="form-check-label text-muted" for="is_public">
+                                <i class="fas {% if project.is_public %}fa-globe{% else %}fa-lock{% endif %}"></i>
+                                {% if project.is_public %}Публічний проект{% else %}Приватний проект{% endif %}
+                            </label>
+                        </div>
+                    </form>
+                    {% else %}
+                    <h2>{{ project.title }}</h2>
+                    <p class="text-muted">
+                        <i class="fas {% if project.is_public %}fa-globe{% else %}fa-lock{% endif %}"></i>
+                        {% if project.is_public %}Публічний проект{% else %}Приватний проект{% endif %}
+                    </p>
+                    {% endif %}
+                    <p class="text-muted">Створено: {{ project.created_at|date:"d.m.Y H:i" }}</p>
+                    <p>{{ project.description }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'export_csv' project.id %}" class="btn btn-success">Експорт CSV</a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">Критерії</h3>
+                {% if project.user == request.user %}
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#criteriaEdit" aria-expanded="false">
+                    Редактувати Критерії
+                </button>
+                {% endif %}
+            </div>
+
+            <div class="collapse" id="criteriaEdit">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'create_criterion' project.id %}">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control form-control-sm" name="name" placeholder="Назва критерію" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select form-select-sm" name="type" required>
+                                        <option value="">Виберіть тип</option>
+                                        <option value="numeric">Числовий</option>
+                                        <option value="text">Текстовий</option>
+                                        <option value="color">Колір</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" name="description" placeholder="Опис критерію">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Додати</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-group mb-3">
+                {% for criterion in project.criteria.all %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">{{ criterion.name }}</h6>
+                            <small class="text-muted">{{ criterion.get_type_display }}</small>
+                            {% if criterion.description %}
+                            <p class="mb-0 text-muted">{{ criterion.description }}</p>
+                            {% endif %}
+                        </div>
+                        {% if project.user == request.user %}
+                        <form method="POST" action="{% url 'delete_criterion' project.id criterion.id %}" class="d-inline" onsubmit="return confirm('Ви впевнені, що хочете видалити цей критерій?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    <p class="mb-0">У проекті ще немає критеріїв. {% if project.user == request.user %}Додайте критерії для оцінки альтернатив.{% endif %}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">Альтернативи</h3>
+                {% if project.user == request.user %}
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#alternativesEdit" aria-expanded="false" id="toggleEditBtn">
+                    Редактувати Альтернативи
+                </button>
+                {% endif %}
+            </div>
+
+            {% if project.user == request.user %}
+            <div class="collapse" id="alternativesEdit">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <a href="{% url 'add_alternative' project.id %}" class="btn btn-primary">Додати альтернативу</a>
+                    <button type="submit" form="alternatives-form" class="btn btn-success">Зберегти всі зміни</button>
+                </div>
+                <form id="alternatives-form" method="POST" action="{% url 'update_all_alternatives' project.id %}">
+                    {% csrf_token %}
+                    <div class="list-group">
+                        {% for alt in alternatives %}
+                        <div class="list-group-item py-2">
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <div class="flex-grow-1">
+                                    <h5 class="mb-1">{{ alt.name }}</h5>
+                                    <p class="mb-1 small text-muted">{{ alt.description }}</p>
+                                </div>
+                                <div class="d-flex flex-column gap-2" style="min-width: 500px;">
+                                    <div class="d-flex gap-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label class="form-label mb-0 small" style="min-width: 80px;">Рейтинг:</label>
+                                            <div class="input-group input-group-sm" style="width: 120px;">
+                                                <input type="number" class="form-control" name="rating_{{ alt.id }}" value="{{ alt.rating }}" min="0" max="10" step="1">
+                                                <span class="input-group-text">/10</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label class="form-label mb-0 small" style="min-width: 80px;">Відношення:</label>
+                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                <select class="form-select" name="relationship_{{ alt.id }}">
+                                                    <option value="">Без відношення</option>
+                                                    {% for rel_type in relationship_types %}
+                                                    <option value="{{ rel_type.id }}" {% if alt.relationship.id == rel_type.id %}selected{% endif %}>
+                                                        {{ rel_type.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex flex-column gap-2 flex-grow-1">
+                                            {% if project.criteria.all %}
+                                            <div class="d-flex align-items-center gap-2">
+                                                <label class="form-label mb-0 small" style="min-width: 80px;">Критерії:</label>
+                                                <div class="d-flex gap-2 flex-wrap">
+                                                    {% for criterion in project.criteria.all %}
+                                                    <div class="input-group input-group-sm" style="width: 130px;">
+                                                        <span class="input-group-text small">{{ criterion.name }}</span>
+                                                        {% if criterion.type == 'numeric' %}
+                                                        <input type="number" class="form-control" 
+                                                               name="criterion_{{ criterion.id }}_{{ alt.id }}" 
+                                                               value="{{ alt.criteria_values|get_item:criterion.name|default:'' }}"
+                                                               step="any">
+                                                        {% elif criterion.type == 'text' %}
+                                                        <input type="text" class="form-control" 
+                                                               name="criterion_{{ criterion.id }}_{{ alt.id }}" 
+                                                               value="{{ alt.criteria_values|get_item:criterion.name|default:'' }}">
+                                                        {% elif criterion.type == 'color' %}
+                                                        <input type="color" class="form-control" 
+                                                               name="criterion_{{ criterion.id }}_{{ alt.id }}" 
+                                                               value="{{ alt.criteria_values|get_item:criterion.name|default:'#000000' }}">
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end">
+                                        <form method="POST" action="{% url 'delete_alternative' project.id alt.id %}" class="d-inline" onsubmit="return confirm('Ви впевнені, що хочете видалити цю альтернативу?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">У проекті ще немає альтернатив. Додайте альтернативи для порівняння.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="list-group">
+                {% for alt in alternatives %}
+                <div class="list-group-item py-2">
+                    <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ alt.name }}</h5>
+                            <p class="mb-1 small text-muted">{{ alt.description }}</p>
+                        </div>
+                        <div class="d-flex flex-column gap-2" style="min-width: 500px;">
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-primary">Рейтинг: {{ alt.rating }}</span>
+                                {% if alt.relationship %}
+                                <span class="badge bg-secondary">{{ alt.relationship.name }}</span>
+                                {% endif %}
+                            </div>
+                            {% if project.criteria.all %}
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% for criterion in project.criteria.all %}
+                                <div class="input-group input-group-sm" style="width: 130px;">
+                                    <span class="input-group-text small">{{ criterion.name }}</span>
+                                    <span class="form-control small">
+                                        {{ alt.criteria_values|get_item:criterion.name|default:'-' }}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-info">
+                    <p class="mb-0">У проекті ще немає альтернатив.</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <style>
+        .collapse {
+            transition: all 0.3s ease-in-out;
+        }
+        .collapse.show {
+            animation: slideDown 0.3s ease-in-out;
+        }
+        .collapse:not(.show) {
+            animation: slideUp 0.3s ease-in-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('toggleEditBtn');
+            const alternativesEdit = document.getElementById('alternativesEdit');
+            
+            alternativesEdit.addEventListener('show.bs.collapse', function () {
+                toggleBtn.textContent = 'Сховати редактування альтернатив';
+            });
+            
+            alternativesEdit.addEventListener('hide.bs.collapse', function () {
+                toggleBtn.textContent = 'Редактувати Альтернативи';
+            });
+        });
+    </script>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Відношення</h3>
+            <div id="relations-container">
+                {% if project.user == request.user %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'create_relationship_type' project.id %}">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control form-control-sm" name="name" placeholder="Назва відношення" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control form-control-sm" name="description" placeholder="Опис відношення">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Створити</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <h5 class="mb-3">Типи відношень</h5>
+                <div class="list-group">
+                    {% for rel_type in relationship_types %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">{{ rel_type.name }}</h6>
+                                {% if rel_type.description %}
+                                <p class="card-text text-muted mb-0">{{ rel_type.description }}</p>
+                                {% endif %}
+                            </div>
+                            {% if project.user == request.user %}
+                            <form method="POST" action="{% url 'delete_relationship_type' project.id rel_type.id %}" onsubmit="return confirm('Ви впевнені, що хочете видалити цей тип відношення? Це також видалить це відношення з усіх альтернатив.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Видалити</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>Немає типів відношень</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if analysis %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Фільтрація</h3>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form id="filter-form" method="GET" action="{% url 'project_detail' project.id %}">
+                        <div class="row g-3">
+                            {% if project.criteria.all %}
+                            <div class="col-md-6">
+                                <h5>Фільтр за критеріями</h5>
+                                {% for criterion in project.criteria.all %}
+                                <div class="mb-3">
+                                    <label class="form-label">{{ criterion.name }}</label>
+                                    {% if criterion.type == 'numeric' %}
+                                    <div class="d-flex gap-2">
+                                        <input type="number" class="form-control form-control-sm" 
+                                               name="criterion_min_{{ criterion.id }}" 
+                                               placeholder="Мін"
+                                               value="{{ request.GET|get_item:'criterion_min_'|add:criterion.id|stringformat:'i' }}">
+                                        <input type="number" class="form-control form-control-sm" 
+                                               name="criterion_max_{{ criterion.id }}" 
+                                               placeholder="Макс"
+                                               value="{{ request.GET|get_item:'criterion_max_'|add:criterion.id|stringformat:'i' }}">
+                                    </div>
+                                    {% elif criterion.type == 'text' %}
+                                    <input type="text" class="form-control form-control-sm" 
+                                           name="criterion_{{ criterion.id }}" 
+                                           placeholder="Значення"
+                                           value="{{ request.GET|get_item:'criterion_'|add:criterion.id|stringformat:'i' }}">
+                                    {% elif criterion.type == 'color' %}
+                                    <input type="color" class="form-control form-control-sm" 
+                                           name="criterion_{{ criterion.id }}" 
+                                           value="{{ request.GET|get_item:'criterion_'|add:criterion.id|stringformat:'i'|default:'#000000' }}">
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <div class="col-md-6">
+                                <h5>Фільтр за відношеннями</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Тип відношення</label>
+                                    <select class="form-select form-select-sm" name="relationship">
+                                        <option value="">Всі відношення</option>
+                                        {% for rel_type in relationship_types %}
+                                        <option value="{{ rel_type.id }}" 
+                                                {% if request.GET.relationship == rel_type.id|stringformat:"i" %}selected{% endif %}>
+                                            {{ rel_type.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Рейтинг</label>
+                                    <div class="d-flex gap-2">
+                                        <input type="number" class="form-control form-control-sm" 
+                                               name="rating_min" 
+                                               placeholder="Мін"
+                                               min="0" max="10"
+                                               value="{{ request.GET.rating_min }}">
+                                        <input type="number" class="form-control form-control-sm" 
+                                               name="rating_max" 
+                                               placeholder="Макс"
+                                               min="0" max="10"
+                                               value="{{ request.GET.rating_max }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="submit" class="btn btn-primary">Застосувати фільтри</button>
+                            <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary">Скинути</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Аналіз</h3>
+            <div class="card">
+                <div class="card-body">
+                    {% with alternatives_with_ratings=alternatives|dictsortreversed:"rating" %}
+                        {% if alternatives_with_ratings %}
+                        <h5>Топ 5 альтернатив:</h5>
+                        <ul class="list-group">
+                            {% for alt in alternatives_with_ratings|slice:":5" %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if forloop.counter == 1 %}
+                                    <i class="fas fa-medal text-warning" title="Перше місце"></i>
+                                    {% elif forloop.counter == 2 %}
+                                    <i class="fas fa-medal text-secondary" title="Друге місце"></i>
+                                    {% elif forloop.counter == 3 %}
+                                    <i class="fas fa-medal text-danger" title="Третє місце"></i>
+                                    {% endif %}
+                                    {{ alt.name }}
+                                    <span class="badge bg-primary ms-2">Рейтинг: {{ alt.rating }}</span>
+                                    {% if alt.relationship %}
+                                    <span class="badge bg-secondary ms-2">{{ alt.relationship.name }}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ analysis.all_scores|get_item:alt.name|floatformat:3 }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Немає даних для аналізу</h5>
+                            <p class="mb-0">Для проведення аналізу потрібно додати альтернативи та встановити їх рейтинги.</p>
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3>Граф відношень</h3>
+            <div id="graph-container" style="height: 700px; width: 100%;"></div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    // Graph data from the backend
+    const graphData = {{ graph_data|safe }};
+    
+    // Create the graph visualization
+    const width = document.getElementById('graph-container').offsetWidth;
+    const height = 600;
+    const padding = 50;
+    
+    // Add tooltip div
+    const tooltip = d3.select('#graph-container')
+        .append('div')
+        .attr('class', 'tooltip')
+        .style('position', 'absolute')
+        .style('visibility', 'hidden')
+        .style('background-color', 'white')
+        .style('border', '1px solid #ddd')
+        .style('padding', '10px')
+        .style('border-radius', '5px')
+        .style('box-shadow', '0 2px 4px rgba(0,0,0,0.1)')
+        .style('z-index', '1000');
+    
+    const svg = d3.select('#graph-container')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+    
+    // Add zoom behavior
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+        });
+    
+    svg.call(zoom);
+    
+    // Create a group for all elements
+    const g = svg.append('g');
+    
+    const simulation = d3.forceSimulation(graphData.nodes)
+        .force('link', d3.forceLink(graphData.edges).id(d => d.id).distance(100))
+        .force('charge', d3.forceManyBody().strength(-300))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(50))
+        .force('x', d3.forceX(width / 2).strength(0.1))
+        .force('y', d3.forceY(height / 2).strength(0.1));
+    
+    // Color scale for relationship types
+    const colorScale = d3.scaleOrdinal()
+        .domain(['domination', 'indifference', 'has_relationship'])
+        .range(['#ff4d4f', '#69c0ff', '#52c41a']);
+    
+    // Node color scale
+    const nodeColorScale = d3.scaleOrdinal()
+        .domain(['alternative', 'relationship'])
+        .range(['#69c0ff', '#ffa940']);
+    
+    const link = g.append('g')
+        .selectAll('line')
+        .data(graphData.edges)
+        .enter()
+        .append('line')
+        .attr('stroke', d => colorScale(d.type))
+        .attr('stroke-opacity', 0.6)
+        .attr('stroke-width', 2);
+    
+    const node = g.append('g')
+        .selectAll('circle')
+        .data(graphData.nodes)
+        .enter()
+        .append('circle')
+        .attr('r', d => d.type === 'relationship' ? 8 : 10)
+        .attr('fill', d => nodeColorScale(d.type))
+        .call(d3.drag()
+            .on('start', dragstarted)
+            .on('drag', dragged)
+            .on('end', dragended))
+        .on('mouseover', function(event, d) {
+            let content = `<strong>${d.id}</strong><br>`;
+            
+            if (d.type === 'alternative') {
+                content += `Рейтинг: ${d.rating}<br>`;
+                // Get all relations for this alternative
+                const relations = graphData.edges.filter(e => 
+                    (e.source === d.id || e.target === d.id) && 
+                    e.type !== 'has_relationship'
+                );
+                if (relations.length > 0) {
+                    content += '<br>Відношення з іншими альтернативами:<br>';
+                    relations.forEach(r => {
+                        const relationType = r.type === 'domination' ? 'домінує над' : 'байдужий до';
+                        content += r.source === d.id ? 
+                            `${d.id} ${relationType} ${r.target}<br>` :
+                            `${r.source} ${relationType} ${d.id}<br>`;
+                    });
+                }
+            } else if (d.type === 'relationship') {
+                content += `Опис: ${d.description || 'Немає опису'}<br>`;
+                // Get all alternatives with this relationship
+                const relatedAlts = graphData.edges
+                    .filter(e => e.type === 'has_relationship' && e.target === d.id)
+                    .map(e => e.source);
+                if (relatedAlts.length > 0) {
+                    content += '<br>Альтернативи з цим відношенням:<br>';
+                    relatedAlts.forEach(alt => {
+                        content += `${alt}<br>`;
+                    });
+                }
+            }
+            
+            tooltip.html(content)
+                .style('visibility', 'visible');
+        })
+        .on('mousemove', function(event) {
+            const containerRect = document.getElementById('graph-container').getBoundingClientRect();
+            tooltip
+                .style('top', (event.clientY - containerRect.top - 10) + 'px')
+                .style('left', (event.clientX - containerRect.left + 10) + 'px');
+        })
+        .on('mouseout', function() {
+            tooltip.style('visibility', 'hidden');
+        });
+    
+    const label = g.append('g')
+        .selectAll('text')
+        .data(graphData.nodes)
+        .enter()
+        .append('text')
+        .text(d => d.id)
+        .attr('font-size', 12)
+        .attr('dx', 15)
+        .attr('dy', 4);
+    
+    simulation.on('tick', () => {
+        // Keep nodes within bounds
+        graphData.nodes.forEach(d => {
+            d.x = Math.max(padding, Math.min(width - padding, d.x));
+            d.y = Math.max(padding, Math.min(height - padding, d.y));
+        });
+        
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+        
+        node
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+        
+        label
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+    
+    function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+    }
+    
+    function dragged(event) {
+        event.subject.fx = Math.max(padding, Math.min(width - padding, event.x));
+        event.subject.fy = Math.max(padding, Math.min(height - padding, event.y));
+    }
+    
+    function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+    }
+
+    // Add controls for zoom
+    const controls = d3.select('#graph-container')
+        .append('div')
+        .style('position', 'absolute')
+        .style('top', '10px')
+        .style('right', '10px')
+        .style('z-index', '1000');
+
+    controls.append('button')
+        .text('+')
+        .style('width', '30px')
+        .style('height', '30px')
+        .style('margin', '2px')
+        .style('border', '1px solid #ddd')
+        .style('border-radius', '3px')
+        .style('background', 'white')
+        .style('cursor', 'pointer')
+        .on('click', () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 1.3);
+        });
+
+    controls.append('button')
+        .text('-')
+        .style('width', '30px')
+        .style('height', '30px')
+        .style('margin', '2px')
+        .style('border', '1px solid #ddd')
+        .style('border-radius', '3px')
+        .style('background', 'white')
+        .style('cursor', 'pointer')
+        .on('click', () => {
+            svg.transition().duration(300).call(zoom.scaleBy, 0.7);
+        });
+
+    controls.append('button')
+        .text('⟲')
+        .style('width', '30px')
+        .style('height', '30px')
+        .style('margin', '2px')
+        .style('border', '1px solid #ddd')
+        .style('border-radius', '3px')
+        .style('background', 'white')
+        .style('cursor', 'pointer')
+        .on('click', () => {
+            svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+        });
+</script>
+{% endblock %}
+{% endblock %} 
