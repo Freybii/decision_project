@@ -1,62 +1,72 @@
 # Decision Project
 
-A Django-based decision-making application that helps users make informed decisions through structured analysis and comparison of alternatives.
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/Freybii/decision_project/django.yml?branch=main)](https://github.com/Freybii/decision_project/actions)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## Features
+A powerful Django-based decision-making application that helps users make informed decisions through structured analysis and comparison of alternatives. The application provides a comprehensive suite of tools for project management, alternative comparison, and decision analysis.
 
-- 🔐 **Authentication System**
-  - Custom user model with email-based authentication
-  - Google OAuth integration
-  - User profile management
-  - Secure password handling
+## 🌟 Features
 
-- 📊 **Decision Analysis**
-  - Create and manage decision projects
-  - Add and compare alternatives
-  - Rate alternatives based on criteria
-  - Visualize decision relationships
-  - Network analysis for complex decisions
+### 🔐 Authentication System
+- Custom user model with email-based authentication
+- Google OAuth integration for seamless login
+- Secure password handling and JWT tokens
+- User profile management with avatar support
 
-- 🎯 **Project Management**
-  - Create and organize decision projects
-  - Add detailed descriptions and criteria
-  - Upload project images
-  - Track project progress
+### 📊 Decision Analysis
+- Create and manage decision projects
+- Add and compare alternatives
+- Rate alternatives based on criteria
+- Visualize decision relationships
+- Network analysis for complex decisions using NetworkX
 
-- 💡 **Alternative Management**
-  - Add multiple alternatives to projects
-  - Define relationships between alternatives
-  - Rate alternatives based on criteria
-  - Compare alternatives visually
+### 🎯 Project Management
+- Create and organize decision projects
+- Add detailed descriptions and criteria
+- Upload project images
+- Track project progress
+- Collaborative decision-making
 
-- 🔄 **API Integration**
-  - RESTful API endpoints
-  - JWT authentication
-  - Serialized data responses
-  - Comprehensive API documentation
+### 💡 Alternative Management
+- Add multiple alternatives to projects
+- Define relationships between alternatives
+- Rate alternatives based on criteria
+- Compare alternatives visually
+- Export analysis results
 
-## Technology Stack
+### 🔄 API Integration
+- RESTful API endpoints
+- JWT authentication
+- Serialized data responses
+- Comprehensive API documentation
+- Swagger/OpenAPI support
 
-- **Backend Framework**: Django 4.2
-- **REST Framework**: Django REST Framework 3.14
-- **Database**: PostgreSQL
+## 🛠 Technology Stack
+
+- **Backend Framework**: [Django 4.2](https://www.djangoproject.com/)
+- **REST Framework**: [Django REST Framework 3.14](https://www.django-rest-framework.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **Authentication**: JWT, Google OAuth
-- **Frontend**: Django Templates, Bootstrap 5
-- **Analysis**: NetworkX for graph analysis
+- **Frontend**: Django Templates, [Bootstrap 5](https://getbootstrap.com/)
+- **Analysis**: [NetworkX](https://networkx.org/) for graph analysis
 - **Testing**: Django Test Framework
 - **CI/CD**: GitHub Actions
 
-## Prerequisites
+## 📋 Prerequisites
 
 - Python 3.9+
 - PostgreSQL
 - Virtual environment (recommended)
+- Google OAuth credentials (for Google login)
 
-## Installation
+## 🚀 Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/decision_project.git
+   git clone https://github.com/Freybii/decision_project.git
    cd decision_project
    ```
 
@@ -92,7 +102,7 @@ A Django-based decision-making application that helps users make informed decisi
    python manage.py runserver
    ```
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 decision_project/
@@ -104,7 +114,7 @@ decision_project/
 └── requirements.txt  # Project dependencies
 ```
 
-## API Endpoints
+## 🔌 API Endpoints
 
 ### Authentication
 - `POST /api/auth/register/` - User registration
@@ -127,7 +137,7 @@ decision_project/
 - `PUT /api/alternatives/{id}/` - Update alternative
 - `DELETE /api/alternatives/{id}/` - Delete alternative
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
@@ -135,30 +145,38 @@ decision_project/
 4. Push to the branch: `git push origin feature/your-feature`
 5. Submit a pull request
 
-## Testing
+## 🧪 Testing
 
 Run the test suite:
 ```bash
 python manage.py test
 ```
 
-## Code Style
+## 📝 Code Style
 
 This project follows PEP 8 style guidelines. Run the linter:
 ```bash
 flake8 .
 ```
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 💬 Support
 
-For support, please open an issue in the GitHub repository or contact the maintainers.
+For support, please:
+- Open an issue in the GitHub repository
+- Contact the maintainers
+- Join our community discussions
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- Django and Django REST Framework communities
-- NetworkX for graph analysis capabilities
-- All contributors who have helped shape this project 
+- [Django](https://www.djangoproject.com/) and [Django REST Framework](https://www.django-rest-framework.org/) communities
+- [NetworkX](https://networkx.org/) for graph analysis capabilities
+- All contributors who have helped shape this project
+
+## 📞 Contact
+
+- GitHub: [@Freybii](https://github.com/Freybii)
+- Project Link: [https://github.com/Freybii/decision_project](https://github.com/Freybii/decision_project) 

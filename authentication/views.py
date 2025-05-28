@@ -19,6 +19,79 @@ from django.contrib import messages
 def profile_view(request):
     return render(request, 'main/profile.html', {'user': request.user})
 
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.bio = request.POST.get('bio', user.bio)
+        
+        if 'avatar' in request.FILES:
+            user.avatar = request.FILES['avatar']
+            
+        user.save()
+        messages.success(request, 'Профіль успішно оновлено.')
+        return redirect('authentication:profile')
+        
+    return render(request, 'main/edit_profile.html', {'user': request.user})
+
+@login_required
+def google_callback(request):
+    """Handle Google OAuth callback."""
+    try:
+        # Get the authorization code from the request
+        code = request.GET.get('code')
+        if not code:
+            messages.error(request, 'Не вдалося отримати код авторизації від Google.')
+            return redirect('authentication:login')
+
+        # Exchange the code for tokens
+        token_url = 'https://oauth2.googleapis.com/token'
+        token_data = {
+            'code': code,
+            'client_id': settings.GOOGLE_OAUTH2_CLIENT_ID,
+            'client_secret': settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+            'redirect_uri': settings.GOOGLE_OAUTH2_REDIRECT_URI,
+            'grant_type': 'authorization_code',
+        }
+        
+        token_response = requests.post(token_url, data=token_data)
+        token_response.raise_for_status()
+        tokens = token_response.json()
+
+        # Get user info using the access token
+        userinfo_response = requests.get(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            headers={'Authorization': f'Bearer {tokens["access_token"]}'}
+        )
+        userinfo_response.raise_for_status()
+        userinfo = userinfo_response.json()
+
+        # Create or update user
+        email = userinfo['email']
+        try:
+            user = CustomUser.objects.get(email=email)
+            if not user.google_id:
+                user.google_id = userinfo['sub']
+                user.save()
+        except CustomUser.DoesNotExist:
+            user = CustomUser.objects.create(
+                email=email,
+                username=email,
+                first_name=userinfo.get('given_name', ''),
+                last_name=userinfo.get('family_name', ''),
+                google_id=userinfo['sub']
+            )
+
+        login(request, user)
+        messages.success(request, 'Ви успішно увійшли через Google.')
+        return redirect('index')
+
+    except Exception as e:
+        messages.error(request, f'Помилка входу через Google: {str(e)}')
+        return redirect('authentication:login')
+
 class RegistrationView(views.APIView):
     permission_classes = [AllowAny]
 
