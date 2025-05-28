@@ -124,8 +124,8 @@ REST_FRAMEWORK = {
 }
 
 # Google OAuth2 settings
-GOOGLE_OAUTH2_CLIENT_ID = '89490724990-viql3ege4r8dihm3kuk6c779dc7tkfar.apps.googleusercontent.com'
-GOOGLE_OAUTH2_CLIENT_SECRET = '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'
+GOOGLE_OAUTH2_CLIENT_ID = '89490724990-viql3ege4r8dihm3kuk6c779dc7tkfar.apps.googleusercontent.com'  # Change this in production!
+GOOGLE_OAUTH2_CLIENT_SECRET = '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'  # Change this in production!
 
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # Change this in production!
@@ -135,5 +135,3 @@ SOME_LONG_SETTING = (
     'This is a very long setting that needs to be broken into multiple lines '
     'to comply with PEP 8 line length limits.'
 )
-
-# Ensure the file ends with a newline 

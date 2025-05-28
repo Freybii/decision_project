@@ -558,38 +558,39 @@ def update_project(request, project_id):
     if project.user != request.user:
         messages.error(request, 'У вас немає прав для редагування цього проекту')
         return redirect('project_detail', project_id=project_id)
-    
+
     if request.method == "POST":
         title = request.POST.get('title')
         is_public = request.POST.get('is_public') == 'on'
-        
+
         project.title = title
         project.is_public = is_public
         project.save()
-        
+
         messages.success(request, 'Проект успішно оновлено')
-    
+
     return redirect('project_detail', project_id=project_id)
+
 
 @login_required
 def update_all_alternatives(request, project_id):
     if request.method == "POST":
         project = get_object_or_404(Project, id=project_id)
-        
+
         # Check if the user owns the project
         if project.user != request.user:
             messages.error(request, 'У вас немає прав для редагування цього проекту')
             return redirect('project_detail', project_id=project_id)
-        
+
         try:
             # Get all alternatives for this project
             alternatives = Alternative.objects.filter(project=project)
-            
+
             # Update each alternative's rating, relationship and criteria values
             for alt in alternatives:
                 rating_key = f'rating_{alt.id}'
                 relationship_key = f'relationship_{alt.id}'
-                
+
                 if rating_key in request.POST:
                     try:
                         rating = int(request.POST.get(rating_key, 0))
@@ -597,7 +598,7 @@ def update_all_alternatives(request, project_id):
                     except ValueError:
                         messages.error(request, f'Невірне значення рейтингу для {alt.name}')
                         continue
-                
+
                 if relationship_key in request.POST:
                     relationship_id = request.POST.get(relationship_key)
                     if relationship_id:
@@ -609,7 +610,7 @@ def update_all_alternatives(request, project_id):
                             continue
                     else:
                         alt.relationship = None
-                
+
                 # Update criteria values
                 criteria_values = {}
                 for criterion in project.criteria.all():
@@ -623,33 +624,34 @@ def update_all_alternatives(request, project_id):
                                 messages.error(request, f'Невірне числове значення для {criterion.name} в {alt.name}')
                                 continue
                         criteria_values[criterion.name] = value
-                
+
                 alt.criteria_values = criteria_values
                 alt.save()
-            
+
             # Update relations based on new ratings
             create_relations_from_ratings(project_id)
-            
+
             messages.success(request, 'Всі зміни успішно збережено')
         except Exception as e:
             messages.error(request, f'Помилка при збереженні змін: {str(e)}')
-    
+
     return redirect('project_detail', project_id=project_id)
+
 
 @login_required
 def create_criterion(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    
+
     # Check if the user owns the project
     if project.user != request.user:
         messages.error(request, 'У вас немає прав для редагування цього проекту')
         return redirect('project_detail', project_id=project_id)
-    
+
     if request.method == "POST":
         name = request.POST.get("name")
         criterion_type = request.POST.get("type")
         description = request.POST.get("description", "")
-        
+
         try:
             Criterion.objects.create(
                 project=project,
@@ -660,19 +662,20 @@ def create_criterion(request, project_id):
             messages.success(request, 'Критерій успішно створено')
         except IntegrityError:
             messages.error(request, 'Критерій з такою назвою вже існує')
-    
+
     return redirect('project_detail', project_id=project_id)
+
 
 @login_required
 def delete_criterion(request, project_id, criterion_id):
     project = get_object_or_404(Project, id=project_id)
     criterion = get_object_or_404(Criterion, id=criterion_id, project=project)
-    
+
     # Check if the user owns the project
     if project.user != request.user:
         messages.error(request, 'У вас немає прав для видалення критерію')
         return redirect('project_detail', project_id=project_id)
-    
+
     if request.method == "POST":
         # Remove criterion values from all alternatives
         alternatives = Alternative.objects.filter(project=project)
@@ -680,27 +683,29 @@ def delete_criterion(request, project_id, criterion_id):
             if criterion.name in alt.criteria_values:
                 del alt.criteria_values[criterion.name]
                 alt.save()
-        
+
         criterion.delete()
         messages.success(request, 'Критерій успішно видалено')
-    
+
     return redirect('project_detail', project_id=project_id)
+
 
 @login_required
 def toggle_like(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     like, created = Like.objects.get_or_create(user=request.user, project=project)
-    
+
     if not created:
         like.delete()
         liked = False
     else:
         liked = True
-    
+
     return JsonResponse({
         'liked': liked,
         'likes_count': project.likes.count()
     })
+
 
 def public_projects(request):
     projects = Project.objects.filter(is_public=True).order_by('-created_at')
@@ -708,23 +713,25 @@ def public_projects(request):
         liked_projects = set(Like.objects.filter(user=request.user).values_list('project_id', flat=True))
     else:
         liked_projects = set()
-    
+
     context = {
         'projects': projects,
         'liked_projects': liked_projects
     }
     return render(request, 'main/public_projects.html', context)
 
+
 @login_required
 def my_projects(request):
     projects = Project.objects.filter(user=request.user).order_by('-created_at')
     liked_projects = set(Like.objects.filter(user=request.user).values_list('project_id', flat=True))
-    
+
     context = {
         'projects': projects,
         'liked_projects': liked_projects
     }
     return render(request, 'main/my_projects.html', context)
+
 
 def profile(request, username):
     user = get_object_or_404(CustomUser, username=username)
@@ -733,7 +740,7 @@ def profile(request, username):
         liked_projects = set(Like.objects.filter(user=request.user).values_list('project_id', flat=True))
     else:
         liked_projects = set()
-    
+
     context = {
         'profile_user': user,
         'projects': projects,
@@ -741,20 +748,21 @@ def profile(request, username):
     }
     return render(request, 'main/profile.html', context)
 
+
 @login_required
 def update_project_image(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    
+
     # Check if user owns the project
     if project.user != request.user:
         messages.error(request, 'У вас немає прав для редагування цього проекту.')
         return redirect('project_detail', project_id=project.id)
-    
+
     if request.method == 'POST' and request.FILES.get('image'):
         project.image = request.FILES['image']
         project.save()
         messages.success(request, 'Зображення проекту успішно оновлено!')
     else:
         messages.error(request, 'Помилка при оновленні зображення.')
-    
+
     return redirect('project_detail', project_id=project.id)
