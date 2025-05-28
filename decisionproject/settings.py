@@ -92,16 +92,28 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        ),
     },
 ]
 
@@ -145,7 +157,9 @@ REST_FRAMEWORK = {
 }
 
 # Google OAuth2 settings
-GOOGLE_OAUTH2_CLIENT_ID = '676275484107-fq1ui8beoe4kobhn038jgrv74ef0ilnb.apps.googleusercontent.com'
+GOOGLE_OAUTH2_CLIENT_ID = (
+    '676275484107-fq1ui8beoe4kobhn038jgrv74ef0ilnb.apps.googleusercontent.com'
+)
 GOOGLE_OAUTH2_CLIENT_SECRET = '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'
 
 # CORS settings

@@ -6,7 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from .serializers import UserRegistrationSerializer, UserLoginSerializer, UserSerializer
+from .serializers import (
+    UserRegistrationSerializer, UserLoginSerializer, UserSerializer
+)
 from .models import CustomUser
 import jwt
 from datetime import datetime, timedelta
@@ -40,13 +42,12 @@ def edit_profile(request):
 def google_callback(request):
     """Handle Google OAuth callback."""
     try:
-        # Get the authorization code from the request
         code = request.GET.get('code')
         if not code:
-            messages.error(request, 'Не вдалося отримати код авторизації від Google.')
+            messages.error(
+                request, 'Не вдалося отримати код авторизації від Google.'
+            )
             return redirect('authentication:login')
-
-        # Exchange the code for tokens
         token_url = 'https://oauth2.googleapis.com/token'
         token_data = {
             'code': code,
@@ -55,20 +56,15 @@ def google_callback(request):
             'redirect_uri': settings.GOOGLE_OAUTH2_REDIRECT_URI,
             'grant_type': 'authorization_code',
         }
-        
         token_response = requests.post(token_url, data=token_data)
         token_response.raise_for_status()
         tokens = token_response.json()
-
-        # Get user info using the access token
         userinfo_response = requests.get(
             'https://www.googleapis.com/oauth2/v3/userinfo',
             headers={'Authorization': f'Bearer {tokens["access_token"]}'}
         )
         userinfo_response.raise_for_status()
         userinfo = userinfo_response.json()
-
-        # Create or update user
         email = userinfo['email']
         try:
             user = CustomUser.objects.get(email=email)
@@ -83,11 +79,9 @@ def google_callback(request):
                 last_name=userinfo.get('family_name', ''),
                 google_id=userinfo['sub']
             )
-
         login(request, user)
         messages.success(request, 'Ви успішно увійшли через Google.')
         return redirect('index')
-
     except Exception as e:
         messages.error(request, f'Помилка входу через Google: {str(e)}')
         return redirect('authentication:login')
@@ -105,8 +99,10 @@ class RegistrationView(views.APIView):
                     'token': token,
                     'user': UserSerializer(user).data
                 }, status=status.HTTP_201_CREATED)
-            else:
-                return render(request, 'main/login.html', {'message': 'Реєстрація успішна! Тепер ви можете увійти.'})
+            return render(
+                request, 'main/login.html',
+                {'message': 'Реєстрація успішна! Тепер ви можете увійти.'}
+            )
         if request.path.startswith('/api/'):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return render(request, 'main/register.html', {'errors': serializer.errors})
@@ -140,10 +136,9 @@ class LoginView(views.APIView):
                         'token': token,
                         'user': UserSerializer(user).data
                     })
-                else:
-                    login(request, user)  # Create session for web interface
-                    messages.success(request, 'Ви успішно увійшли в систему.')
-                    return redirect('index')
+                login(request, user)
+                messages.success(request, 'Ви успішно увійшли в систему.')
+                return redirect('index')
             if request.path.startswith('/api/'):
                 return Response(
                     {'error': 'Невірний email або пароль'},
@@ -175,16 +170,14 @@ class GoogleLoginView(views.APIView):
         try:
             token = request.data.get('token')
             idinfo = id_token.verify_oauth2_token(
-                token, 
-                requests.Request(), 
+                token,
+                requests.Request(),
                 settings.GOOGLE_OAUTH2_CLIENT_ID
             )
-
             email = idinfo['email']
             first_name = idinfo.get('given_name', '')
             last_name = idinfo.get('family_name', '')
             google_id = idinfo['sub']
-
             try:
                 user = CustomUser.objects.get(email=email)
                 if not user.google_id:
@@ -193,40 +186,18 @@ class GoogleLoginView(views.APIView):
             except CustomUser.DoesNotExist:
                 user = CustomUser.objects.create(
                     email=email,
-                    username=email,  # Using email as username
+                    username=email,
                     first_name=first_name,
                     last_name=last_name,
                     google_id=google_id
                 )
-
-            if request.path.startswith('/api/'):
-                token = self.generate_jwt_token(user)
-                return Response({
-                    'token': token,
-                    'user': UserSerializer(user).data
-                })
-            else:
-                login(request, user)  # Create session for web interface
-                messages.success(request, 'Ви успішно увійшли через Google.')
-                return redirect('index')
+            login(request, user)
+            messages.success(request, 'Ви успішно увійшли через Google.')
+            return redirect('index')
         except Exception as e:
-            if request.path.startswith('/api/'):
-                return Response(
-                    {'error': str(e)},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             messages.error(request, f'Помилка входу через Google: {str(e)}')
             return redirect('authentication:login')
 
-    def generate_jwt_token(self, user):
-        payload = {
-            'user_id': str(user.id),
-            'email': user.email,
-            'exp': datetime.utcnow() + timedelta(days=1)
-        }
-        return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
-
 def logout_view(request):
     logout(request)
-    messages.success(request, 'Ви успішно вийшли з системи.')
-    return redirect('index')
+    return redirect('authentication:login')
