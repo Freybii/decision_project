@@ -240,7 +240,8 @@ class RelationshipTypeTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(
-        self.assertFalse(RelationshipType.objects.filter(id=relationship_type.id).exists())
+            RelationshipType.objects.filter(id=rel_type.id).exists()
+        )
 
 class LikeTests(TestCase):
     def setUp(self):
