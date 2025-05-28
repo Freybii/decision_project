@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from .models import CustomUser
 from django.contrib.auth.hashers import make_password
 
@@ -20,6 +21,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('email', 'username', 'password', 'password2', 'first_name',
                  'last_name')
+        extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
         if data['password'] != data['password2']:
