@@ -3,33 +3,44 @@ from .models import CustomUser
 from django.contrib.auth.hashers import make_password
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    password_confirm = serializers.CharField(write_only=True)
+    """Serializer for user registration."""
     
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    password2 = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'username', 'password', 'password_confirm', 'first_name', 'last_name', 'avatar', 'date_of_birth')
-        extra_kwargs = {
-            'password': {'write_only': True},
-            'password_confirm': {'write_only': True}
-        }
+        fields = ('email', 'username', 'password', 'password2', 'first_name',
+                 'last_name')
 
     def validate(self, data):
-        if data['password'] != data['password_confirm']:
-            raise serializers.ValidationError("Паролі не співпадають")
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError(
+                {"password": "Password fields didn't match."}
+            )
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
-        validated_data['password'] = make_password(validated_data.get('password'))
-        return super().create(validated_data)
+        validated_data.pop('password2')
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
 class UserSerializer(serializers.ModelSerializer):
+    """Serializer for the CustomUser model."""
+    
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'first_name', 'last_name', 'avatar', 'date_of_birth')
+        fields = ('id', 'email', 'username', 'first_name', 'last_name', 'bio')
         read_only_fields = ('id',) 
