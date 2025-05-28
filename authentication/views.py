@@ -17,9 +17,11 @@ from django.contrib import messages
 
 # Create your views here.
 
+
 @login_required
 def profile_view(request):
     return render(request, 'main/profile.html', {'user': request.user})
+
 
 @login_required
 def edit_profile(request):
@@ -28,15 +30,13 @@ def edit_profile(request):
         user.first_name = request.POST.get('first_name', user.first_name)
         user.last_name = request.POST.get('last_name', user.last_name)
         user.bio = request.POST.get('bio', user.bio)
-        
         if 'avatar' in request.FILES:
             user.avatar = request.FILES['avatar']
-            
         user.save()
         messages.success(request, 'Профіль успішно оновлено.')
         return redirect('authentication:profile')
-        
     return render(request, 'main/edit_profile.html', {'user': request.user})
+
 
 @login_required
 def google_callback(request):
@@ -86,6 +86,7 @@ def google_callback(request):
         messages.error(request, f'Помилка входу через Google: {str(e)}')
         return redirect('authentication:login')
 
+
 class RegistrationView(views.APIView):
     permission_classes = [AllowAny]
 
@@ -104,7 +105,9 @@ class RegistrationView(views.APIView):
                 {'message': 'Реєстрація успішна! Тепер ви можете увійти.'}
             )
         if request.path.startswith('/api/'):
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
         return render(request, 'main/register.html', {'errors': serializer.errors})
 
     def get(self, request):
@@ -117,6 +120,7 @@ class RegistrationView(views.APIView):
             'exp': datetime.utcnow() + timedelta(days=1)
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
 
 class LoginView(views.APIView):
     permission_classes = [AllowAny]
@@ -147,7 +151,9 @@ class LoginView(views.APIView):
             messages.error(request, 'Невірний email або пароль')
             return render(request, 'main/login.html')
         if request.path.startswith('/api/'):
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
         return render(request, 'main/login.html', {'errors': serializer.errors})
 
     def get(self, request):
@@ -162,6 +168,7 @@ class LoginView(views.APIView):
             'exp': datetime.utcnow() + timedelta(days=1)
         }
         return jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+
 
 class GoogleLoginView(views.APIView):
     permission_classes = [AllowAny]
@@ -197,6 +204,7 @@ class GoogleLoginView(views.APIView):
         except Exception as e:
             messages.error(request, f'Помилка входу через Google: {str(e)}')
             return redirect('authentication:login')
+
 
 def logout_view(request):
     logout(request)

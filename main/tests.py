@@ -33,34 +33,44 @@ class ProjectTests(TestCase):
 
     def test_create_project(self):
         """Test project creation"""
-        response = self.client.post(reverse('create_project'), {
-            'title': 'New Project',
-            'description': 'New Description',
-            'is_public': 'on'
-        })
+        response = self.client.post(
+            reverse('create_project'),
+            {
+                'title': 'New Project',
+                'description': 'New Description',
+                'is_public': 'on'
+            }
+        )
         self.assertEqual(response.status_code, 302)  # Redirect after success
         self.assertTrue(Project.objects.filter(title='New Project').exists())
 
     def test_project_detail_view(self):
         """Test project detail view"""
-        response = self.client.get(reverse('project_detail', args=[self.project.id]))
+        response = self.client.get(
+            reverse('project_detail', args=[self.project.id])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Test Project')
         self.assertContains(response, 'Test Description')
 
     def test_update_project(self):
         """Test project update"""
-        response = self.client.post(reverse('update_project', args=[self.project.id]), {
-            'title': 'Updated Project',
-            'is_public': 'on'
-        })
+        response = self.client.post(
+            reverse('update_project', args=[self.project.id]),
+            {
+                'title': 'Updated Project',
+                'is_public': 'on'
+            }
+        )
         self.assertEqual(response.status_code, 302)
         updated_project = Project.objects.get(id=self.project.id)
         self.assertEqual(updated_project.title, 'Updated Project')
 
     def test_delete_project(self):
         """Test project deletion"""
-        response = self.client.post(reverse('delete_project', args=[self.project.id]))
+        response = self.client.post(
+            reverse('delete_project', args=[self.project.id])
+        )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Project.objects.filter(id=self.project.id).exists())
 
@@ -83,7 +93,7 @@ class AlternativeTests(TestCase):
         )
         self.client = Client()
         self.client.login(email='test@example.com', password='testpass123')
-        
+
         self.project = Project.objects.create(
             user=self.user,
             title='Test Project',
@@ -92,12 +102,17 @@ class AlternativeTests(TestCase):
 
     def test_create_alternative(self):
         """Test alternative creation"""
-        response = self.client.post(reverse('add_alternative', args=[self.project.id]), {
-            'name': 'Test Alternative',
-            'description': 'Test Description'
-        })
+        response = self.client.post(
+            reverse('add_alternative', args=[self.project.id]),
+            {
+                'name': 'Test Alternative',
+                'description': 'Test Description'
+            }
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(Alternative.objects.filter(name='Test Alternative').exists())
+        self.assertTrue(
+            Alternative.objects.filter(name='Test Alternative').exists()
+        )
 
     def test_update_alternative_rating(self):
         """Test alternative rating update"""
@@ -107,7 +122,10 @@ class AlternativeTests(TestCase):
             rating=5
         )
         response = self.client.post(
-            reverse('update_alternative_rating', args=[self.project.id, alternative.id]),
+            reverse(
+                'update_alternative_rating',
+                args=[self.project.id, alternative.id]
+            ),
             {'rating': 8}
         )
         self.assertEqual(response.status_code, 302)
@@ -121,10 +139,15 @@ class AlternativeTests(TestCase):
             name='Test Alternative'
         )
         response = self.client.post(
-            reverse('delete_alternative', args=[self.project.id, alternative.id])
+            reverse(
+                'delete_alternative',
+                args=[self.project.id, alternative.id]
+            )
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(Alternative.objects.filter(id=alternative.id).exists())
+        self.assertFalse(
+            Alternative.objects.filter(id=alternative.id).exists()
+        )
 
 class CriterionTests(TestCase):
     def setUp(self):
@@ -143,13 +166,18 @@ class CriterionTests(TestCase):
 
     def test_create_criterion(self):
         """Test criterion creation"""
-        response = self.client.post(reverse('create_criterion', args=[self.project.id]), {
-            'name': 'Test Criterion',
-            'type': 'numeric',
-            'description': 'Test Description'
-        })
+        response = self.client.post(
+            reverse('create_criterion', args=[self.project.id]),
+            {
+                'name': 'Test Criterion',
+                'type': 'numeric',
+                'description': 'Test Description'
+            }
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(Criterion.objects.filter(name='Test Criterion').exists())
+        self.assertTrue(
+            Criterion.objects.filter(name='Test Criterion').exists()
+        )
 
     def test_delete_criterion(self):
         """Test criterion deletion"""
@@ -159,10 +187,15 @@ class CriterionTests(TestCase):
             type='numeric'
         )
         response = self.client.post(
-            reverse('delete_criterion', args=[self.project.id, criterion.id])
+            reverse(
+                'delete_criterion',
+                args=[self.project.id, criterion.id]
+            )
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(Criterion.objects.filter(id=criterion.id).exists())
+        self.assertFalse(
+            Criterion.objects.filter(id=criterion.id).exists()
+        )
 
 class RelationshipTypeTests(TestCase):
     def setUp(self):
@@ -173,7 +206,7 @@ class RelationshipTypeTests(TestCase):
         )
         self.client = Client()
         self.client.login(email='test@example.com', password='testpass123')
-        
+
         self.project = Project.objects.create(
             user=self.user,
             title='Test Project'
@@ -181,23 +214,32 @@ class RelationshipTypeTests(TestCase):
 
     def test_create_relationship_type(self):
         """Test relationship type creation"""
-        response = self.client.post(reverse('create_relationship_type', args=[self.project.id]), {
-            'name': 'Test Relationship',
-            'description': 'Test Description'
-        })
+        response = self.client.post(
+            reverse('create_relationship_type', args=[self.project.id]),
+            {
+                'name': 'Test Relationship',
+                'description': 'Test Description'
+            }
+        )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(RelationshipType.objects.filter(name='Test Relationship').exists())
+        self.assertTrue(
+            RelationshipType.objects.filter(name='Test Relationship').exists()
+        )
 
     def test_delete_relationship_type(self):
         """Test relationship type deletion"""
-        relationship_type = RelationshipType.objects.create(
+        rel_type = RelationshipType.objects.create(
             project=self.project,
             name='Test Relationship'
         )
         response = self.client.post(
-            reverse('delete_relationship_type', args=[self.project.id, relationship_type.id])
+            reverse(
+                'delete_relationship_type',
+                args=[self.project.id, rel_type.id]
+            )
         )
         self.assertEqual(response.status_code, 302)
+        self.assertFalse(
         self.assertFalse(RelationshipType.objects.filter(id=relationship_type.id).exists())
 
 class LikeTests(TestCase):

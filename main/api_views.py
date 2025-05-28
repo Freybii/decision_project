@@ -5,10 +5,11 @@ from django.shortcuts import get_object_or_404
 from .models import Project, Alternative, Relation, RelationshipType, Criterion, Like
 from .serializers import (
     ProjectSerializer, AlternativeSerializer, RelationSerializer,
-    RelationshipTypeSerializer, CriterionSerializer, LikeSerializer
+    RelationshipTypeSerializer, CriterionSerializer
 )
 from django.db import models
 from rest_framework import serializers
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = ProjectSerializer
@@ -29,14 +30,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def toggle_like(self, request, pk=None):
         project = self.get_object()
-        like, created = Like.objects.get_or_create(user=request.user, project=project)
-        
+        like, created = Like.objects.get_or_create(
+            user=request.user, project=project
+        )
         if not created:
             like.delete()
             liked = False
         else:
             liked = True
-        
         return Response({
             'liked': liked,
             'likes_count': project.likes.count()
@@ -45,14 +46,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def copy_project(self, request, pk=None):
         original_project = self.get_object()
-        
         # Prevent copying own projects
         if original_project.user == request.user:
             return Response(
                 {'error': 'Ви не можете скопіювати свій власний проект.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         # Create new project
         new_project = Project.objects.create(
             user=request.user,
@@ -61,7 +60,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
             image=original_project.image,
             is_public=False
         )
-        
         # Copy relationship types
         relationship_type_map = {}
         for rel_type in original_project.relationship_types.all():
@@ -71,7 +69,6 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 description=rel_type.description
             )
             relationship_type_map[rel_type.id] = new_rel_type
-        
         # Copy alternatives
         for alt in original_project.alternatives.all():
             new_alt = Alternative.objects.create(
@@ -84,9 +81,9 @@ class ProjectViewSet(viewsets.ModelViewSet):
             if alt.relationship:
                 new_alt.relationship = relationship_type_map[alt.relationship.id]
                 new_alt.save()
-        
         serializer = self.get_serializer(new_project)
         return Response(serializer.data)
+
 
 class AlternativeViewSet(viewsets.ModelViewSet):
     serializer_class = AlternativeSerializer
@@ -98,8 +95,11 @@ class AlternativeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         project_id = self.kwargs.get('project_pk')
-        project = get_object_or_404(Project, id=project_id, user=self.request.user)
+        project = get_object_or_404(
+            Project, id=project_id, user=self.request.user
+        )
         serializer.save(project=project)
+
 
 class RelationViewSet(viewsets.ModelViewSet):
     serializer_class = RelationSerializer
@@ -108,24 +108,24 @@ class RelationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         project_id = self.kwargs.get('project_pk')
         return Relation.objects.filter(
-            models.Q(source__project_id=project_id) | 
+            models.Q(source__project_id=project_id) |
             models.Q(target__project_id=project_id)
         )
 
     def perform_create(self, serializer):
         project_id = self.kwargs.get('project_pk')
-        project = get_object_or_404(Project, id=project_id, user=self.request.user)
-        
+        project = get_object_or_404(
+            Project, id=project_id, user=self.request.user
+        )
         # Verify that both alternatives belong to the project
         source = serializer.validated_data['source']
         target = serializer.validated_data['target']
-        
         if source.project != project or target.project != project:
             raise serializers.ValidationError(
                 "Обидві альтернативи повинні належати до одного проекту"
             )
-        
         serializer.save()
+
 
 class RelationshipTypeViewSet(viewsets.ModelViewSet):
     serializer_class = RelationshipTypeSerializer
@@ -137,8 +137,11 @@ class RelationshipTypeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         project_id = self.kwargs.get('project_pk')
-        project = get_object_or_404(Project, id=project_id, user=self.request.user)
+        project = get_object_or_404(
+            Project, id=project_id, user=self.request.user
+        )
         serializer.save(project=project)
+
 
 class CriterionViewSet(viewsets.ModelViewSet):
     serializer_class = CriterionSerializer
@@ -150,5 +153,7 @@ class CriterionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         project_id = self.kwargs.get('project_pk')
-        project = get_object_or_404(Project, id=project_id, user=self.request.user)
+        project = get_object_or_404(
+            Project, id=project_id, user=self.request.user
+        )
         serializer.save(project=project) 

@@ -21,11 +21,9 @@ def index(request):
         'user': request.user
     }
     return render(request, 'main/index.html', context)
-# Create your views here.
 
 def about(request):
     return render(request, 'main/about.html')
-# Create your views here.
 
 def home(request):
     return render(request, 'main/home.html')

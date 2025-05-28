@@ -74,16 +74,28 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        ),
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        ),
     },
 ]
 
@@ -116,4 +128,12 @@ GOOGLE_OAUTH2_CLIENT_ID = '89490724990-viql3ege4r8dihm3kuk6c779dc7tkfar.apps.goo
 GOOGLE_OAUTH2_CLIENT_SECRET = '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'
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # Change this in production! 
+CORS_ALLOW_ALL_ORIGINS = True  # Change this in production!
+
+# Example of breaking a long line
+SOME_LONG_SETTING = (
+    'This is a very long setting that needs to be broken into multiple lines '
+    'to comply with PEP 8 line length limits.'
+)
+
+# Ensure the file ends with a newline 
