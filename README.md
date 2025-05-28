@@ -158,10 +158,6 @@ This project follows PEP 8 style guidelines. Run the linter:
 flake8 .
 ```
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 💬 Support
 
 For support, please:
