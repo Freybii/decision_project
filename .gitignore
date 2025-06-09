@@ -25,7 +25,9 @@ wheels/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
+media/*
+!media/screenshots/
+!media/screenshots/**
 static/
 
 # Virtual Environment
@@ -47,4 +49,4 @@ Thumbs.db
 .env
 *.bak
 *.tmp
-*.temp 
+*.temp
