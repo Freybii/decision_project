@@ -157,7 +157,7 @@
                                         <div class="d-flex align-items-center gap-2">
                                             <label class="form-label mb-0 small" style="min-width: 80px;">Рейтинг:</label>
                                             <div class="input-group input-group-sm" style="width: 120px;">
-                                                <input type="number" class="form-control" name="rating_{{ alt.id }}" value="{{ alt.rating }}" min="0" max="10" step="1">
+                                                <input type="number" class="form-control" name="rating_{{ alt.id }}" value="{{ alt.rating }}" min="0" step="any">
                                                 <span class="input-group-text">/10</span>
                                             </div>
                                         </div>
@@ -426,12 +426,12 @@
                                         <input type="number" class="form-control form-control-sm" 
                                                name="rating_min" 
                                                placeholder="Мін"
-                                               min="0" max="10"
+                                               min="0"
                                                value="{{ request.GET.rating_min }}">
                                         <input type="number" class="form-control form-control-sm" 
                                                name="rating_max" 
                                                placeholder="Макс"
-                                               min="0" max="10"
+                                               min="0"
                                                value="{{ request.GET.rating_max }}">
                                     </div>
                                 </div>

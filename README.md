@@ -1,102 +1,109 @@
-# Decision Project
+# Проєкт Decision Project
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
 [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/Freybii/decision_project/django.yml?branch=main)](https://github.com/Freybii/decision_project/actions)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A powerful Django-based decision-making application that helps users make informed decisions through structured analysis and comparison of alternatives. The application provides a comprehensive suite of tools for project management, alternative comparison, and decision analysis.
+Потужний додаток для прийняття рішень на основі Django, який допомагає користувачам приймати обґрунтовані рішення через структурований аналіз та порівняння альтернатив. Додаток надає комплексний набір інструментів для керування проєктами, порівняння альтернатив та аналізу рішень.
 
-## 🌟 Features
+## 👤 Автор
 
-### 🔐 Authentication System
-- Custom user model with email-based authentication
-- Google OAuth integration for seamless login
-- Secure password handling and JWT tokens
-- User profile management with avatar support
+- **ПІБ**: Дзірба Б. П.
+- **Група**: ФеП-41
+- **Керівник**: Катеринчук Іван Миколайович к.ф.-м.н., доцент
+- **Дата виконання**: [31.05.2025]
 
-### 📊 Decision Analysis
-- Create and manage decision projects
-- Add and compare alternatives
-- Rate alternatives based on criteria
-- Visualize decision relationships
-- Network analysis for complex decisions using NetworkX
+## 🌟 Можливості
 
-### 🎯 Project Management
-- Create and organize decision projects
-- Add detailed descriptions and criteria
-- Upload project images
-- Track project progress
-- Collaborative decision-making
+### 🔐 Система аутентифікації
+- Кастомна модель користувача з аутентифікацією через email
+- Інтеграція Google OAuth для зручного входу
+- Захищена обробка паролів та JWT-токени
+- Керування профілем користувача з підтримкою аватарів
 
-### 💡 Alternative Management
-- Add multiple alternatives to projects
-- Define relationships between alternatives
-- Rate alternatives based on criteria
-- Compare alternatives visually
-- Export analysis results
+### 📊 Аналіз рішень
+- Створення та керування проєктами рішень
+- Додавання та порівняння альтернатив
+- Оцінювання альтернатив на основі критеріїв
+- Візуалізація зв'язків між рішеннями
+- Мережевий аналіз складних рішень з використанням NetworkX
 
-### 🔄 API Integration
-- RESTful API endpoints
-- JWT authentication
-- Serialized data responses
-- Comprehensive API documentation
-- Swagger/OpenAPI support
+### 🎯 Керування проєктами
+- Створення та організація проєктів рішень
+- Додавання детальних описів та критеріїв
+- Завантаження зображень проєктів
+- Відстеження прогресу проєкту
+- Спільне прийняття рішень
 
-## 🛠 Technology Stack
+### 💡 Керування альтернативами
+- Додавання кількох альтернатив до проєктів
+- Визначення зв'язків між альтернативами
+- Оцінювання альтернатив на основі критеріїв
+- Візуальне порівняння альтернатив
+- Експорт результатів аналізу
 
-- **Backend Framework**: [Django 4.2](https://www.djangoproject.com/)
-- **REST Framework**: [Django REST Framework 3.14](https://www.django-rest-framework.org/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
-- **Authentication**: JWT, Google OAuth
-- **Frontend**: Django Templates, [Bootstrap 5](https://getbootstrap.com/)
-- **Analysis**: [NetworkX](https://networkx.org/) for graph analysis
-- **Testing**: Django Test Framework
+### 🔄 Інтеграція API
+- RESTful API ендпоінти
+- Аутентифікація через JWT
+- Серіалізовані відповіді даних
+- Детальна документація API
+- Підтримка Swagger/OpenAPI
+
+## 🛠 Технологічний стек
+
+- **Бекенд-фреймворк**: [Django 4.2](https://www.djangoproject.com/)
+- **REST-фреймворк**: [Django REST Framework 3.14](https://www.django-rest-framework.org/)
+- **База даних**: [SQLite](https://www.SQLite.org/)
+- **Аутентифікація**: JWT, Google OAuth
+- **Фронтенд**: Django Templates, [Bootstrap 5](https://getbootstrap.com/)
+- **Аналіз**: [NetworkX](https://networkx.org/) для мережевого аналізу
+- **Тестування**: Django Test Framework
 - **CI/CD**: GitHub Actions
 
-## 📋 Prerequisites
+## 📋 Передумови
 
 - Python 3.9+
-- PostgreSQL
-- Virtual environment (recommended)
-- Google OAuth credentials (for Google login)
+- SQLite
+- Віртуальне середовище (рекомендовано)
+- Облікові дані Google OAuth (для входу через Google)
 
-## 🚀 Installation
+## 🚀 Встановлення
 
-1. Clone the repository:
+1. Клонуйте репозиторій:
    ```bash
    git clone https://github.com/Freybii/decision_project.git
    cd decision_project
    ```
 
-2. Create and activate a virtual environment:
+2. Створіть та активуйте віртуальне середовище:
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
-3. Install dependencies:
+3. Встановіть залежності:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Set up environment variables:
+4. Налаштуйте змінні середовища:
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
-5. Run migrations:
+5. Виконайте міграції:
    ```bash
    python manage.py migrate
    ```
 
-6. Create a superuser:
+6. Створіть суперкористувача:
    ```bash
    python manage.py createsuperuser
    ```
 
-7. Run the development server:
+7. Запустіть сервер розробки:
    ```bash
    python manage.py runserver
    ```
@@ -105,73 +112,72 @@ A powerful Django-based decision-making application that helps users make inform
 
 ```
 decision_project/
-├── authentication/     # User authentication and management
-├── main/              # Core decision-making functionality
-├── decisionproject/   # Project configuration
-├── media/            # User-uploaded files
+├── authentication/     # Аутентифікація та керування користувачами
+├── main/              # Основна функціональність прийняття рішень
+├── decisionproject/   # Конфігурація проєкту
+├── media/            # Файли, завантажені користувачами
 ├── .github/          # GitHub Actions workflows
-└── requirements.txt  # Project dependencies
+└── requirements.txt  # Залежності проєкту
 ```
 
-## 🔌 API Endpoints
+## 🔌 API Ендпоінти
 
-### Authentication
-- `POST /api/auth/register/` - User registration
-- `POST /api/auth/login/` - User login
-- `POST /api/auth/google-login/` - Google OAuth login
-- `GET /api/auth/profile/` - User profile
-- `PUT /api/auth/profile/` - Update profile
+### Аутентифікація
+- `POST /api/auth/register/` - Реєстрація користувача
+- `POST /api/auth/login/` - Вхід користувача
+- `POST /api/auth/google-login/` - Вхід через Google OAuth
+- `GET /api/auth/profile/` - Профіль користувача
+- `PUT /api/auth/profile/` - Оновлення профілю
 
-### Projects
-- `GET /api/projects/` - List projects
-- `POST /api/projects/` - Create project
-- `GET /api/projects/{id}/` - Project details
-- `PUT /api/projects/{id}/` - Update project
-- `DELETE /api/projects/{id}/` - Delete project
+### Проєкти
+- `GET /api/projects/` - Список проєктів
+- `POST /api/projects/` - Створення проєкту
+- `GET /api/projects/{id}/` - Деталі проєкту
+- `PUT /api/projects/{id}/` - Оновлення проєкту
+- `DELETE /api/projects/{id}/` - Видалення проєкту
 
-### Alternatives
-- `GET /api/projects/{id}/alternatives/` - List alternatives
-- `POST /api/projects/{id}/alternatives/` - Add alternative
-- `GET /api/alternatives/{id}/` - Alternative details
-- `PUT /api/alternatives/{id}/` - Update alternative
-- `DELETE /api/alternatives/{id}/` - Delete alternative
+### Альтернативи
+- `GET /api/projects/{id}/alternatives/` - Список альтернатив
+- `POST /api/projects/{id}/alternatives/` - Додати альтернативу
+- `GET /api/alternatives/{id}/` - Деталі альтернативи
+- `PUT /api/alternatives/{id}/` - Оновити альтернативу
+- `DELETE /api/alternatives/{id}/` - Видалити альтернативу
 
-## 🤝 Contributing
+## 🤝 Участь у розробці
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -am 'Add your feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Submit a pull request
+1. Форкніть репозиторій
+2. Створіть гілку для функціоналу: `git checkout -b feature/your-feature`
+3. Зробіть коміт змін: `git commit -am 'Add your feature'`
+4. Запуште гілку: `git push origin feature/your-feature`
+5. Створіть pull request
 
-## 🧪 Testing
+## 🧪 Тестування
 
-Run the test suite:
+Запустіть тести:
 ```bash
 python manage.py test
 ```
 
-## 📝 Code Style
+## 📝 Стиль коду
 
-This project follows PEP 8 style guidelines. Run the linter:
+Проєкт дотримується стилю PEP 8. Запустіть лінтер:
 ```bash
 flake8 .
 ```
 
-## 💬 Support
+## 💬 Підтримка
 
 For support, please:
-- Open an issue in the GitHub repository
-- Contact the maintainers
-- Join our community discussions
+- Відкрийте issue у репозиторії GitHub
+- Зв'яжіться з мейнтейнерами
+- Приєднуйтесь до обговорень у спільноті
 
-## 🙏 Acknowledgments
+## 🙏 Подяки
 
-- [Django](https://www.djangoproject.com/) and [Django REST Framework](https://www.django-rest-framework.org/) communities
-- [NetworkX](https://networkx.org/) for graph analysis capabilities
-- All contributors who have helped shape this project
+- Спільноти [Django](https://www.djangoproject.com/) та [Django REST Framework](https://www.django-rest-framework.org/)
+- [NetworkX](https://networkx.org/) за можливості мережевого аналізу
 
-## 📞 Contact
+## 📞 Контакти
 
 - GitHub: [@Freybii](https://github.com/Freybii)
-- Project Link: [https://github.com/Freybii/decision_project](https://github.com/Freybii/decision_project) 
+- Посилання на проєкт: [https://github.com/Freybii/decision_project](https://github.com/Freybii/decision_project) 
