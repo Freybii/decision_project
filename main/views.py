@@ -741,6 +741,13 @@ def profile(request, username):
     else:
         liked_projects = set()
 
+    # Додаємо обробку POST для аватара
+    if request.method == 'POST' and request.user == user and request.FILES.get('avatar'):
+        user.avatar = request.FILES['avatar']
+        user.save()
+        messages.success(request, 'Аватар успішно оновлено!')
+        return redirect('profile', username=username)
+
     context = {
         'profile_user': user,
         'projects': projects,
